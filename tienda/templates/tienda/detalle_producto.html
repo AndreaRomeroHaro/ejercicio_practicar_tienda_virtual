@@ -1,0 +1,33 @@
+{% extends 'tienda/base.html' %}
+
+{% block titulo %}Detalle Producto{% endblock %}
+
+{% block contenido %}
+<div>
+    <div>
+        <div>
+            <h4>Detalle producto</h4>
+        </div>
+        <div>
+            <p><strong>Nombre:</strong> {{ producto.nombre }}</p>
+            <p><strong>Marca:</strong> {{ producto.marca }}</p>
+            <p><strong>Modelo:</strong> {{ producto.modelo }}</p>
+            <p><strong>Unidades:</strong> {{ producto.unidades }}</p>
+            <p><strong>Precio:</strong> {{ producto.precio }}</p>
+            <p><strong>Vip:</strong> {{ producto.vip }}</p>
+            {% if producto.foto %}
+                <p>
+                    <img src="{{ producto.foto.url }}" alt="{{ producto.nombre }}" width="300">
+                </p>
+            {% else %}
+                <p>No hay imagen</p>
+            {% endif %}
+        </div>
+        <div>
+            <a href="{% url 'listado_productos' %}">Volver</a>
+            <a href="{% url 'editar_producto' producto.id %}">Editar</a>
+            <a href="{% url 'eliminar_producto' producto.id %}">Eliminar</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

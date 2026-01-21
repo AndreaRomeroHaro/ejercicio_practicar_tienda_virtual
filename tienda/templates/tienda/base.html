@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block titulo %}Tienda Virtual{% endblock %}</title>
+</head>
+<body>
+    <nav>
+        <a href="{% url 'listado_productos' %}">Inicio</a>
+        <a href="{% url 'crear_producto' %}">Crear producto</a>
+    </nav>
+    <main>
+        {% block contenido %}
+        
+        {% endblock %}
+    </main>
+</body>
+</html>
