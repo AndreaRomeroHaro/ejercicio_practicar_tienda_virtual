@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block contenido %}
+    <form>
+        <div>
+            {{ formulario_filtro.as_p }}
+        </div>
+        <div>
+            <button type="submit">Filtrar</button>
+            <a class='boton' href="{% url 'listado_compra' %}">Limpiar los filtros</a>
+        </div>
+    </form>
+
+    <ul>
+        {% for producto in productos %}
+            <li>
+                <h3><a href="{% url 'checkout_compra' producto.pk %}">{{ producto.nombre }} ({{ producto.precio }})</a></h3>
+            </li>
+        {% empty %}
+            <li>No hay productos registrados.</li>
+        {% endfor %}
+    </ul>
+{% endblock %}

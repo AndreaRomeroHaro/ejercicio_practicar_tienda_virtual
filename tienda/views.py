@@ -1,9 +1,9 @@
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404, render
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
 from .models import *
 from .forms import *
-from django.views.generic import ListView,DetailView,CreateView,UpdateView,DeleteView
+from django.views.generic import ListView,DetailView,CreateView,UpdateView,DeleteView,View
 from django.contrib.auth import logout
 
 class ProductoListView(LoginRequiredMixin,ListView):
@@ -41,39 +41,26 @@ class ProductoDeleteView(DeleteView):
     success_url=reverse_lazy('listado_productos')
 
 class CompraListView(LoginRequiredMixin,ListView):
-    model=Compra
-    context_object_name='compra'
-    template_name='tienda/listado_compra.html'
+    model=Producto
+    form=FiltroProductoForm
+    context_object_name='productos'
+    template_name='compra/listado_compra.html'
 
-    def get_queryset(self):
-        producto=Producto.objects.filter(usuario=self.request.user)
-        self.form=FiltroProductoForm(self.request.GET)
-        if self.form.is_valid():
-            nombre=self.form.cleaned_data('nombre')
-            marca=self.form.cleaned_data('marca')
-            modelo=self.form.cleaned_data('modelo')
-            precio=self.form.cleaned_data('precio')
-            vip=self.form.cleaned_data('vip')
-            if nombre:
-                producto=producto.filter(nombre=nombre)
-            if marca:
-                producto=producto.filter(marca=marca)
-            if modelo:
-                producto=producto.filter(modelo=modelo)
-            if precio:
-                producto=producto.filter(precio=precio)
-            if vip:
-                producto=producto.filter(vip=vip)
-        return producto
     def get_context_data(self, **kwargs):
         contexto=super().get_context_data(**kwargs)
         contexto['formulario_filtro']=self.form
         return contexto
     
-class CheckoutCompra(DetailView):
-    model=Compra
-    context_object_name='compra'
-    template_name='tienda/checkout_compra.html'
+class CheckoutCompra(LoginRequiredMixin,View):
+    
+    def get(self,request,pk):
+        producto=get_object_or_404(Producto,pk=pk)
+        return render(request,'compra/checkout_compra.html',{producto:'producto'})
+    
+    def post(self,request,pk):
+        producto=get_object_or_404(Producto,pk=pk)
+        unidades_compradas=request.POST.get('unidades')
+        
 
 def logout_view(request):
     logout(request)
