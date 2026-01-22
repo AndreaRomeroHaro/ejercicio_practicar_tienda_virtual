@@ -9,6 +9,6 @@ urlpatterns=[
     path('admin/productos/edicion/<int:pk>',ProductoUpdateView.as_view(),name='editar_producto'),
     path('admin/productos/eliminar/<int:pk>',ProductoDeleteView.as_view(),name='eliminar_producto'),
     path('compra',CompraListView.as_view(),name='listado_compra'),
-    path('checkout',CheckoutCompra.as_view(),name='checkout_compra'),
+    path('checkout/<int:pk>',CheckoutCompra.as_view(),name='checkout_compra'),
     path('cerrar_sesion/',views.logout_view,name='logout_salir'),
 ]

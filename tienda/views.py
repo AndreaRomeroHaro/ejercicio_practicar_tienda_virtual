@@ -1,4 +1,5 @@
-from django.shortcuts import get_object_or_404, render
+from django.contrib import messages
+from django.shortcuts import get_object_or_404, render,redirect
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
 from .models import *
@@ -52,7 +53,7 @@ class CompraListView(LoginRequiredMixin,ListView):
         return contexto
     
 class CheckoutCompra(LoginRequiredMixin,View):
-    
+
     def get(self,request,pk):
         producto=get_object_or_404(Producto,pk=pk)
         return render(request,'compra/checkout_compra.html',{producto:'producto'})
@@ -60,7 +61,12 @@ class CheckoutCompra(LoginRequiredMixin,View):
     def post(self,request,pk):
         producto=get_object_or_404(Producto,pk=pk)
         unidades_compradas=request.POST.get('unidades')
-        
+        iva_elegido=request.POST.get('iva')
+        Compra.objects.create(usuario=request.user,producto=producto,unidades=unidades_compradas,iva=iva_elegido)
+        producto.unidades=-unidades_compradas
+        producto.save()
+        messages.success(request, f"Has comprado {unidades_compradas} unidades de {producto.nombre}")
+        return redirect('listado_productos')
 
 def logout_view(request):
     logout(request)
