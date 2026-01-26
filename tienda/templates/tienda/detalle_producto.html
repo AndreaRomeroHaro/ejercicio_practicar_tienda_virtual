@@ -1,32 +1,60 @@
 {% extends 'base.html' %}
-
-{% block titulo %}Detalle Producto{% endblock %}
+{% block titulo %}Detalle: {{ producto.nombre }}{% endblock %}
 
 {% block contenido %}
-<div>
-    <div>
-        <div>
-            <h4>Detalle producto</h4>
-        </div>
-        <div>
-            <p><strong>Nombre:</strong> {{ producto.nombre }}</p>
-            <p><strong>Marca:</strong> {{ producto.marca }}</p>
-            <p><strong>Modelo:</strong> {{ producto.modelo }}</p>
-            <p><strong>Unidades:</strong> {{ producto.unidades }}</p>
-            <p><strong>Precio:</strong> {{ producto.precio }}</p>
-            <p><strong>Vip:</strong> {{ producto.vip }}</p>
-            {% if producto.foto %}
-                <p>
-                    <img src="{{ producto.foto.url }}" alt="{{ producto.nombre }}" width="300">
-                </p>
-            {% else %}
-                <p>No hay imagen</p>
-            {% endif %}
-        </div>
-        <div>
-            <a href="{% url 'listado_productos' %}">Volver</a>
-            <a href="{% url 'editar_producto' producto.id %}">Editar</a>
-            <a href="{% url 'eliminar_producto' producto.id %}">Eliminar</a>
+<div class="card shadow-lg">
+    <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+        <h3 class="mb-0">{{ producto.nombre }}</h3>
+        <span class="badge bg-primary fs-6">{{ producto.marca }}</span>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-5 text-center mb-4 mb-md-0">
+                {% if producto.foto %}
+                    <img src="{{ producto.foto.url }}" alt="{{ producto.nombre }}" class="img-fluid rounded border shadow-sm" style="max-height: 400px;">
+                {% else %}
+                    <div class="bg-light d-flex align-items-center justify-content-center rounded border" style="height: 300px;">
+                        <span class="text-muted"><i class="bi bi-image fs-1"></i><br>Sin Imagen</span>
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="col-md-7">
+                <h4 class="text-muted mb-3">Información del Producto</h4>
+                <ul class="list-group list-group-flush mb-4">
+                    <li class="list-group-item d-flex justify-content-between">
+                        <strong>Modelo:</strong> <span>{{ producto.modelo }}</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between">
+                        <strong>Unidades Disponibles:</strong> 
+                        <span class="badge bg-secondary">{{ producto.unidades }}</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between">
+                        <strong>Precio:</strong> 
+                        <span class="fs-5 fw-bold text-success">{{ producto.precio }} €</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between">
+                        <strong>Es VIP:</strong> 
+                        {% if producto.vip %}
+                            <span class="text-warning"><i class="bi bi-star-fill"></i> Sí</span>
+                        {% else %}
+                            <span class="text-muted">No</span>
+                        {% endif %}
+                    </li>
+                </ul>
+
+                <div class="d-flex gap-2">
+                    <a href="{% url 'listado_productos' %}" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left"></i> Volver
+                    </a>
+                    <a href="{% url 'editar_producto' producto.pk %}" class="btn btn-warning">
+                        <i class="bi bi-pencil"></i> Editar
+                    </a>
+                    <a href="{% url 'eliminar_producto' producto.pk %}" class="btn btn-danger">
+                        <i class="bi bi-trash"></i> Eliminar
+                    </a>
+                </div>
+            </div>
         </div>
     </div>
 </div>

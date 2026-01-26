@@ -1,5 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.core.exceptions import ValidationError
+from decimal import Decimal
 
 class Usuario(AbstractUser):
 
@@ -60,9 +62,23 @@ class Compra(models.Model):
     importe=models.DecimalField(max_digits=12,decimal_places=2,default=0.0)
     iva=models.IntegerField(choices=IVA.choices,default=IVA.GENERAL)
 
+    def clean(self):
+        if self.unidades:
+            if self.unidades<1:
+                raise ValidationError("Debes comprar al menos 1 producto.")
+            if self.unidades>self.producto.unidades:
+                raise ValidationError("No hay suficiente stock de este producto.")
+        return super().clean()
+
     def save(self,*args,**kwargs):
+        cantidad_restar=self.unidades
+        if self.pk:
+            compra_anterior=Compra.objects.get(pk=self.pk)
+            cantidad_restar=self.unidades-compra_anterior.unidades
+        self.producto.unidades-=cantidad_restar
+        self.producto.save()
         base=self.producto.precio*self.unidades
-        porcentaje=self.IVA/100
+        porcentaje=Decimal(self.iva)/Decimal(100)
         resultado=base*(1+porcentaje)
         self.importe=resultado
         return super().save(*args,**kwargs)

@@ -43,10 +43,30 @@ class ProductoDeleteView(DeleteView):
 
 class CompraListView(LoginRequiredMixin,ListView):
     model=Producto
-    form=FiltroProductoForm
     context_object_name='productos'
     template_name='compra/listado_compra.html'
 
+    def get_queryset(self):
+        productos=Producto.objects.all()
+        self.form=FiltroProductoForm(self.request.GET)
+        if self.form.is_valid():
+            nombre=self.form.cleaned_data.get('nombre')
+            marca=self.form.cleaned_data.get('marca')
+            modelo=self.form.cleaned_data.get('modelo')
+            precio=self.form.cleaned_data.get('precio')
+            vip=self.form.cleaned_data.get('vip')
+            if nombre:
+                productos=productos.filter(nombre__icontains=nombre)
+            if marca:
+                productos=productos.filter(marca__nombre__icontains=marca)
+            if modelo:
+                productos=productos.filter(modelo=modelo)
+            if precio:
+                productos=productos.filter(precio__lte=precio)
+            if vip:
+                productos=productos.filter(vip=True)
+        return productos
+    
     def get_context_data(self, **kwargs):
         contexto=super().get_context_data(**kwargs)
         contexto['formulario_filtro']=self.form
@@ -56,17 +76,22 @@ class CheckoutCompra(LoginRequiredMixin,View):
 
     def get(self,request,pk):
         producto=get_object_or_404(Producto,pk=pk)
-        return render(request,'compra/checkout_compra.html',{producto:'producto'})
+        tipo_iva=Compra.IVA.choices
+        contexto={'producto':producto,'tipos_iva':Compra.IVA.choices}
+        return render(request,'compra/checkout_compra.html',contexto)
     
     def post(self,request,pk):
         producto=get_object_or_404(Producto,pk=pk)
-        unidades_compradas=request.POST.get('unidades')
-        iva_elegido=request.POST.get('iva')
-        Compra.objects.create(usuario=request.user,producto=producto,unidades=unidades_compradas,iva=iva_elegido)
-        producto.unidades=-unidades_compradas
-        producto.save()
-        messages.success(request, f"Has comprado {unidades_compradas} unidades de {producto.nombre}")
-        return redirect('listado_productos')
+        try:
+            unidades=int(request.POST.get('unidades'))
+            iva=int(request.POST.get('iva'))
+            compra=Compra(usuario=request.user,producto=producto,unidades=unidades,iva=iva)
+            compra.full_clean()
+            compra.save()
+            return redirect('listado_productos')
+        except ValidationError as e:
+            messages.error(request,e.messages[0])
+            return redirect('checkout_compra',pk=pk)
 
 def logout_view(request):
     logout(request)

@@ -1,22 +1,121 @@
 {% extends 'base.html' %}
-{% block contenido %}
-    <form>
-        <div>
-            {{ formulario_filtro.as_p }}
-        </div>
-        <div>
-            <button type="submit">Filtrar</button>
-            <a class='boton' href="{% url 'listado_compra' %}">Limpiar los filtros</a>
-        </div>
-    </form>
 
-    <ul>
-        {% for producto in productos %}
-            <li>
-                <h3><a href="{% url 'checkout_compra' producto.pk %}">{{ producto.nombre }} ({{ producto.precio }}€)</a></h3>
-            </li>
-        {% empty %}
-            <li>No hay productos registrados.</li>
-        {% endfor %}
-    </ul>
+{% block contenido %}
+<div class="container py-4">
+    <div class="row">
+        
+        <div class="col-md-3 mb-4">
+            <div class="card shadow-sm border-0 sticky-top" style="top: 20px; z-index: 1;">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="bi bi-funnel"></i> Filtrar Búsqueda</h5>
+                </div>
+                <div class="card-body">
+                    <form method="get">
+                        <div class="form-group mb-3">
+                            {{ formulario_filtro.as_p }}
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-search"></i> Aplicar Filtros
+                            </button>
+                            <a class="btn btn-outline-secondary" href="{% url 'listado_compra' %}">
+                                <i class="bi bi-x-circle"></i> Limpiar
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-9">
+            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                {% for producto in productos %}
+                    <div class="col">
+                        <div class="card h-100 shadow-sm border-0 transition-hover">
+                            
+                            <div class="position-relative" style="height: 200px; overflow: hidden; background-color: #f8f9fa;">
+                                {% if producto.vip %}
+                                    <span class="position-absolute top-0 start-0 badge bg-warning text-dark m-2">VIP</span>
+                                {% endif %}
+                                
+                                {% if producto.foto %}
+                                    <img src="{{ producto.foto.url }}" class="card-img-top" alt="{{ producto.nombre }}" style="width: 100%; height: 100%; object-fit: cover;">
+                                {% else %}
+                                    <div class="d-flex align-items-center justify-content-center h-100 text-muted">
+                                        <div class="text-center">
+                                            <i class="bi bi-image display-4"></i>
+                                            <p class="small">Sin imagen</p>
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="card-body d-flex flex-column">
+                                <h5 class="card-title text-truncate">{{ producto.nombre }}</h5>
+                                <p class="card-text small text-muted mb-1">{{ producto.marca }} - {{ producto.modelo }}</p>
+                                
+                                <div class="mt-auto">
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <span class="fs-4 fw-bold text-primary">{{ producto.precio }}€</span>
+                                        {% if producto.unidades > 0 %}
+                                            <span class="badge bg-success bg-opacity-75">Stock: {{ producto.unidades|floatformat:0 }}</span>
+                                        {% else %}
+                                            <span class="badge bg-danger">Agotado</span>
+                                        {% endif %}
+                                    </div>
+
+                                    {% if producto.unidades > 0 %}
+                                        <a href="{% url 'checkout_compra' producto.pk %}" class="btn btn-dark w-100">
+                                            Comprar Ahora <i class="bi bi-cart-fill"></i>
+                                        </a>
+                                    {% else %}
+                                        <button class="btn btn-secondary w-100" disabled>
+                                            Sin Stock
+                                        </button>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% empty %}
+                    <div class="col-12">
+                        <div class="alert alert-info text-center py-5">
+                            <i class="bi bi-info-circle display-4 d-block mb-3"></i>
+                            <h4>No se encontraron productos.</h4>
+                            <p>Intenta cambiar los filtros de búsqueda.</p>
+                            <a href="{% url 'listado_compra' %}" class="btn btn-primary mt-2">Ver todo el catálogo</a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<style>
+    form p {
+        margin-bottom: 1rem;
+    }
+    form label {
+        display: block;
+        font-weight: bold;
+        margin-bottom: 0.3rem;
+        color: #555;
+    }
+    form input[type="text"],
+    form input[type="number"],
+    form select {
+        width: 100%;
+        padding: 0.375rem 0.75rem;
+        font-size: 1rem;
+        border: 1px solid #ced4da;
+        border-radius: 0.25rem;
+    }
+    form input[type="checkbox"] {
+        margin-right: 5px;
+        transform: scale(1.2);
+    }
+</style>
 {% endblock %}

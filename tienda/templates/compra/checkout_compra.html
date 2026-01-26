@@ -1,4 +1,77 @@
 {% extends 'base.html' %}
+
 {% block contenido %}
-    
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <div class="card shadow">
+            <div class="card-header bg-dark text-white">
+                <h3 class="mb-0">Finalizar Compra</h3>
+            </div>
+            <div class="card-body p-4">
+                <div class="row">
+                    
+                    <div class="col-md-6 border-end">
+                        <h4 class="text-primary">{{ producto.nombre }}</h4>
+                        <p class="text-muted">Modelo: {{ producto.modelo }}</p>
+                        
+                        <div class="my-4 text-center">
+                            {% if producto.foto %}
+                                <img src="{{ producto.foto.url }}" alt="{{ producto.nombre }}" class="img-fluid rounded" style="max-height: 250px;">
+                            {% else %}
+                                <div class="p-5 bg-light text-muted border rounded">Sin Imagen Disponible</div>
+                            {% endif %}
+                        </div>
+
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item d-flex justify-content-between">
+                                <span>Precio Unitario:</span>
+                                <strong>{{ producto.precio }} €</strong>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between">
+                                <span>Stock Disponible:</span>
+                                <span class="badge bg-success rounded-pill">{{ producto.unidades|floatformat:0 }}</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="col-md-6 d-flex flex-column justify-content-center">
+                        <form method="post">
+                            {% csrf_token %}
+                            
+                            <h5 class="mb-3">Detalles del Pedido</h5>
+
+                            <div class="mb-3">
+                                <label for="unidades" class="form-label">Cantidad</label>
+                                <input type="number" name="unidades" id="unidades" 
+                                       class="form-control form-control-lg" 
+                                       min="1" max="{{ producto.unidades|floatformat:0 }}" 
+                                       value="1" required>
+                                <div class="form-text">Máximo disponible: {{ producto.unidades|floatformat:0 }}</div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="iva" class="form-label">Tipo de IVA</label>
+                                <select name="iva" id="iva" class="form-select">
+                                    {% for valor, texto in tipos_iva %}
+                                        <option value="{{ valor }}">{{ texto }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-success btn-lg">
+                                    Confirmar Compra
+                                </button>
+                                <a href="{% url 'listado_productos' %}" class="btn btn-outline-danger">
+                                    Cancelar
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}

@@ -15,7 +15,7 @@ from pathlib import Path
 import os
 
 # Redirigir después de iniciar sesión
-LOGIN_REDIRECT_URL = 'listado_producto'
+LOGIN_REDIRECT_URL = 'listado_productos'
 
 # Redirigir después de cerrar sesión
 LOGOUT_REDIRECT_URL = 'login' 

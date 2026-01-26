@@ -1,16 +1,28 @@
 {% extends 'base.html' %}
-
-{% block titulo %}Editar producto{% endblock %}
+{% block titulo %}Editar Producto{% endblock %}
 
 {% block contenido %}
-<div>
-        <h2>Crear producto</h2>
-        <form method="post" enctype="multipart/form-data">
-            {% csrf_token %}
-            {{ form.as_p }}
-            <br>
-            <button type="submit">Guardar</button>
-            <a class="boton" href="{% url 'listado_productos' %}">Cancelar</a>
-        </form>
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card shadow">
+            <div class="card-header bg-warning text-dark">
+                <h4 class="mb-0">Editar Producto</h4>
+            </div>
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        {{ form.as_p }}
+                    </div>
+                    
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a class="btn btn-secondary me-md-2" href="{% url 'listado_productos' %}">Cancelar</a>
+                        <button type="submit" class="btn btn-warning">Guardar Cambios</button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
+</div>
 {% endblock %}
