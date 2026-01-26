@@ -55,7 +55,7 @@ class Compra(models.Model):
         verbose_name="Compra"
         verbose_name_plural="Compras"
     
-    producto=models.ForeignKey(Producto,on_delete=models.CASCADE)
+    producto=models.ForeignKey(Producto,on_delete=models.CASCADE,related_name='ventas')
     usuario=models.ForeignKey(Usuario,on_delete=models.CASCADE)
     fecha=models.DateTimeField(auto_now=True)
     unidades=models.IntegerField()

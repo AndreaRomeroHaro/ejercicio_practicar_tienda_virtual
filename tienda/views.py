@@ -6,6 +6,7 @@ from .models import *
 from .forms import *
 from django.views.generic import ListView,DetailView,CreateView,UpdateView,DeleteView,View
 from django.contrib.auth import logout
+from django.db.models import Sum
 
 class ProductoListView(LoginRequiredMixin,ListView):
     model=Producto
@@ -94,7 +95,9 @@ class CheckoutCompra(LoginRequiredMixin,View):
             return redirect('checkout_compra',pk=pk)
         
 class Informe_tienda(LoginRequiredMixin,View):
+
     def get(self,request):
+        #productos por marca
         marcas=Marca.objects.all()
         marca_seleccionada=request.GET.get('marca_id')
         productos=[]
@@ -102,7 +105,17 @@ class Informe_tienda(LoginRequiredMixin,View):
         if marca_seleccionada:
             productos=Producto.objects.filter(marca_id=marca_seleccionada)
             marca_actual=Marca.objects.get(id=marca_seleccionada)
-        contexto={'marcas':marcas,'productos':productos,'marca_actual':marca_actual}
+        
+        #diez productos más vendidos
+        top_productos=Producto.objects.annotate(total_vendida=Sum('ventas__unidades')).order_by('-total_vendida')[:10]
+        
+        #compras de un usuario
+        compras=Compra.objects.filter(usuario=self.request.user)
+
+        #diez mejores clientes
+        top_clientes=Usuario.objects.annotate(total_gastado=Sum('compra__importe')).order_by('-total_gastado')[:10]
+        
+        contexto={'marcas':marcas,'productos':productos,'marca_actual':marca_actual,'top_productos':top_productos,'compras':compras,'top_clientes':top_clientes}
         return render(request,'informe/informe_tienda.html',contexto)
 
 
