@@ -77,7 +77,7 @@ class CheckoutCompra(LoginRequiredMixin,View):
     def get(self,request,pk):
         producto=get_object_or_404(Producto,pk=pk)
         tipo_iva=Compra.IVA.choices
-        contexto={'producto':producto,'tipos_iva':Compra.IVA.choices}
+        contexto={'producto':producto,'tipos_iva':tipo_iva}
         return render(request,'compra/checkout_compra.html',contexto)
     
     def post(self,request,pk):
@@ -92,6 +92,19 @@ class CheckoutCompra(LoginRequiredMixin,View):
         except ValidationError as e:
             messages.error(request,e.messages[0])
             return redirect('checkout_compra',pk=pk)
+        
+class Informe_tienda(LoginRequiredMixin,View):
+    def get(self,request):
+        marcas=Marca.objects.all()
+        marca_seleccionada=request.GET.get('marca_id')
+        productos=[]
+        marca_actual=None
+        if marca_seleccionada:
+            productos=Producto.objects.filter(marca_id=marca_seleccionada)
+            marca_actual=Marca.objects.get(id=marca_seleccionada)
+        contexto={'marcas':marcas,'productos':productos,'marca_actual':marca_actual}
+        return render(request,'informe/informe_tienda.html',contexto)
+
 
 def logout_view(request):
     logout(request)
