@@ -12,5 +12,6 @@ urlpatterns=[
     path('checkout/<int:pk>',CheckoutCompra.as_view(),name='checkout_compra'),
     path('informes/',Informe_tienda.as_view(),name='informe_tienda'),
     path('cerrar_sesion/',views.logout_view,name='logout_salir'),
-    path('login/',LoginClientes.as_view(),name='login'),
+    # path('login/',LoginClientes.as_view(),name='login'),
+    path('perfil/',PerfilView.as_view(),name="perfil"),
 ]

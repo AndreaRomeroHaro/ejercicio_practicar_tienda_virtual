@@ -19,42 +19,42 @@ class ProductoDetailView(DetailView):
     context_object_name='producto'
     template_name='tienda/detalle_producto.html'
 
-class ProductoCreateView(LoginRequiredMixin,UserPassesTestMixin,CreateView):
+class ProductoCreateView(LoginRequiredMixin,CreateView):#UserPassesTestMixin
     model=Producto
     form_class=ProductoForm
     context_object_name='producto'
     template_name='tienda/crear_producto.html'
     success_url=reverse_lazy('listado_productos')
 
-    def test_func(self):
-        usuario=self.request.user
-        return usuario.is_staff or usuario.is_superuser
+    # def test_func(self):
+    #     usuario=self.request.user
+    #     return usuario.is_staff or usuario.is_superuser
     
     def form_valid(self, form):
         form.instance.usuario = self.request.user
         return super().form_valid(form)
 
-class ProductoUpdateView(UpdateView,LoginRequiredMixin,UserPassesTestMixin):
+class ProductoUpdateView(UpdateView,LoginRequiredMixin):#UserPassesTestMixin
     model=Producto
     form_class=ProductoForm
     context_object_name='producto'
     template_name='tienda/editar_producto.html'
     success_url=reverse_lazy('listado_productos')
 
-    def test_func(self):
-        usuario=self.request.user
-        return usuario.is_staff or usuario.is_superuser
+    # def test_func(self):
+    #     usuario=self.request.user
+    #     return usuario.is_staff or usuario.is_superuser
     
 
-class ProductoDeleteView(DeleteView,LoginRequiredMixin,UserPassesTestMixin):
+class ProductoDeleteView(DeleteView,LoginRequiredMixin):#UserPassesTestMixin
     model=Producto
     context_object_name='producto'
     template_name='tienda/eliminar_producto.html'
     success_url=reverse_lazy('listado_productos')
 
-    def test_func(self):
-        usuario=self.request.user
-        return usuario.is_staff or usuario.is_superuser
+    # def test_func(self):
+    #     usuario=self.request.user
+    #     return usuario.is_staff or usuario.is_superuser
 
 class CompraListView(ListView):
     model=Producto
@@ -86,19 +86,40 @@ class CompraListView(ListView):
         contexto=super().get_context_data(**kwargs)
         contexto['formulario_filtro']=self.form
         return contexto
-    
-class CheckoutCompra(LoginRequiredMixin,UserPassesTestMixin,View):
+
+# def listado_compra(request):
+#     formulario_filtro=FiltroProductoForm(request.GET or None)
+#     productos=Producto.objects.all()
+#     if formulario_filtro.is_valid():
+#         nombre=formulario_filtro.cleaned_data.get('nombre')
+#         marca=formulario_filtro.cleaned_data.get('marca')
+#         modelo=formulario_filtro.cleaned_data.get('modelo')
+#         precio=formulario_filtro.cleaned_data.get('precio')
+#         vip=formulario_filtro.cleaned_data.get('vip')
+#         if nombre:
+#             productos=productos.filter(nombre=nombre)
+#         if marca:
+#             productos=productos.filter(marca=marca)
+#         if modelo:
+#             productos=productos.filter(modelo=modelo)
+#         if precio:
+#             productos=productos.filter(precio=precio)
+#         if vip:
+#             productos=productos.filter(vip=True)
+#     return render(request,'compra/listado_compra.html',{'productos':productos,'formulario_filtro':formulario_filtro})
+
+class CheckoutCompra(LoginRequiredMixin,View):#UserPassesTestMixin
 
     #he añadido superusuario
-    def test_func(self):
-        usuario=self.request.user
-        es_cliente=Cliente.objects.filter(usuario=usuario).exists()
-        es_superusuario=usuario.is_superuser
-        return es_cliente or es_superusuario
+    # def test_func(self):
+    #     usuario=self.request.user
+    #     es_cliente=Cliente.objects.filter(usuario=usuario).exists()
+    #     es_superusuario=usuario.is_superuser
+    #     return es_cliente or es_superusuario
     
-    def handle_no_permission(self):
-        messages.error(self.request,"Solo es para clientes")
-        return redirect("listado_productos")
+    # def handle_no_permission(self):
+    #     messages.error(self.request,"Solo es para clientes")
+    #     return redirect("listado_productos")
     
     def get(self,request,pk):
         producto=get_object_or_404(Producto,pk=pk)
@@ -119,11 +140,11 @@ class CheckoutCompra(LoginRequiredMixin,UserPassesTestMixin,View):
             messages.error(request,e.messages[0])
             return redirect('checkout_compra',pk=pk)
         
-class Informe_tienda(LoginRequiredMixin,UserPassesTestMixin,View):
+class Informe_tienda(LoginRequiredMixin,View):#UserPassesTestMixin
 
-    def test_func(self):
-        usuario=self.request.user
-        return usuario.is_staff or usuario.is_superuser
+    # def test_func(self):
+    #     usuario=self.request.user
+    #     return usuario.is_staff or usuario.is_superuser
 
     def get(self,request):
         #productos por marca
@@ -147,19 +168,28 @@ class Informe_tienda(LoginRequiredMixin,UserPassesTestMixin,View):
         contexto={'marcas':marcas,'productos':productos,'marca_actual':marca_actual,'top_productos':top_productos,'compras':compras,'top_clientes':top_clientes}
         return render(request,'informe/informe_tienda.html',contexto)
 
-class LoginClientes(LoginView):
-    template_name='registration/login.html'
+# class LoginClientes(LoginView):
+#     template_name='registration/login.html'
 
-    #he añadido superusuario
-    def form_valid(self, form):
-        usuario=form.get_user()
-        es_cliente=Cliente.objects.filter(usuario=usuario).exists()
-        es_superusuario=usuario.is_superuser
-        if not es_cliente and not es_superusuario:
-            messages.error(self.request,"Solo es para clientes")
-            return self.form_invalid()
-        return super().form_valid(form)
+#     #he añadido superusuario
+#     def form_valid(self, form):
+#         usuario=form.get_user()
+#         es_cliente=Cliente.objects.filter(usuario=usuario).exists()
+#         es_superusuario=usuario.is_superuser
+#         if not es_cliente and not es_superusuario:
+#             messages.error(self.request,"Solo es para clientes")
+#             return self.form_invalid()
+#         return super().form_valid(form)
 
+class PerfilView(CreateView):
+    model=Usuario
+    context_object_name='usuario'
+    template_name='registration/perfil.html'
+    
+    def get_context_data(self, **kwargs):
+        contexto=super().get_context_data(**kwargs)
+        contexto['compras']=Compra.objects.filter(usuario=self.request.user)
+        return contexto
 
 def logout_view(request):
     logout(request)
