@@ -8,13 +8,14 @@
 <body>
     <nav>
         <h1>Iniciar sesión</h1>
+        <h3>Solo para clientes</h3>
     </nav>
     <div>
         {% if form.errors %}
             <p>Error:</p>
             {{ form.errors }}
         {% endif %}
-        <form method="post">
+       <form type="hidden" name="next" value="{{ next }}">  <!-- coge el valor de next, lo guarda de manera oculta,envia ese dato a LoginCliente y la vista lee el dato y lo redirige alli -->
             {% csrf_token %}
             {{ form.as_p }}
             <br>

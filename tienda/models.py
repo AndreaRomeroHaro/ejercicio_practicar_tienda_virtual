@@ -1,5 +1,5 @@
 from django.db import models
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser,User
 from django.core.exceptions import ValidationError
 from decimal import Decimal
 
@@ -85,3 +85,14 @@ class Compra(models.Model):
     
     def __str__(self):
         return f"{self.producto.nombre} - Unidades: {self.unidades} - Importe: {self.importe}"
+    
+class Cliente(models.Model):
+    
+    class Meta:
+        verbose_name="Cliente"
+        verbose_name_plural="Clientes"
+
+    usuario=models.OneToOneField(User,on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"{self.usuario.username}"
