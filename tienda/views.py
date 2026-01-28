@@ -1,13 +1,12 @@
 from django.contrib import messages
 from django.shortcuts import get_object_or_404, render,redirect
-from django.contrib.auth.mixins import LoginRequiredMixin,UserPassesTestMixin
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
 from .models import *
 from .forms import *
 from django.views.generic import ListView,DetailView,CreateView,UpdateView,DeleteView,View
 from django.contrib.auth import logout
-from django.db.models import Sum
-from django.contrib.auth.views import LoginView
+from django.db.models import Sum,Count,Max,Min,Avg
 
 class ProductoListView(ListView):
     model=Producto
@@ -19,42 +18,31 @@ class ProductoDetailView(DetailView):
     context_object_name='producto'
     template_name='tienda/detalle_producto.html'
 
-class ProductoCreateView(LoginRequiredMixin,CreateView):#UserPassesTestMixin
+class ProductoCreateView(CreateView):
     model=Producto
     form_class=ProductoForm
     context_object_name='producto'
     template_name='tienda/crear_producto.html'
     success_url=reverse_lazy('listado_productos')
-
-    # def test_func(self):
-    #     usuario=self.request.user
-    #     return usuario.is_staff or usuario.is_superuser
     
     def form_valid(self, form):
         form.instance.usuario = self.request.user
         return super().form_valid(form)
 
-class ProductoUpdateView(UpdateView,LoginRequiredMixin):#UserPassesTestMixin
+class ProductoUpdateView(UpdateView):
     model=Producto
     form_class=ProductoForm
     context_object_name='producto'
     template_name='tienda/editar_producto.html'
     success_url=reverse_lazy('listado_productos')
-
-    # def test_func(self):
-    #     usuario=self.request.user
-    #     return usuario.is_staff or usuario.is_superuser
     
 
-class ProductoDeleteView(DeleteView,LoginRequiredMixin):#UserPassesTestMixin
+class ProductoDeleteView(DeleteView):
     model=Producto
     context_object_name='producto'
     template_name='tienda/eliminar_producto.html'
     success_url=reverse_lazy('listado_productos')
 
-    # def test_func(self):
-    #     usuario=self.request.user
-    #     return usuario.is_staff or usuario.is_superuser
 
 class CompraListView(ListView):
     model=Producto
@@ -108,18 +96,7 @@ class CompraListView(ListView):
 #             productos=productos.filter(vip=True)
 #     return render(request,'compra/listado_compra.html',{'productos':productos,'formulario_filtro':formulario_filtro})
 
-class CheckoutCompra(LoginRequiredMixin,View):#UserPassesTestMixin
-
-    #he añadido superusuario
-    # def test_func(self):
-    #     usuario=self.request.user
-    #     es_cliente=Cliente.objects.filter(usuario=usuario).exists()
-    #     es_superusuario=usuario.is_superuser
-    #     return es_cliente or es_superusuario
-    
-    # def handle_no_permission(self):
-    #     messages.error(self.request,"Solo es para clientes")
-    #     return redirect("listado_productos")
+class CheckoutCompra(View):
     
     def get(self,request,pk):
         producto=get_object_or_404(Producto,pk=pk)
@@ -140,11 +117,7 @@ class CheckoutCompra(LoginRequiredMixin,View):#UserPassesTestMixin
             messages.error(request,e.messages[0])
             return redirect('checkout_compra',pk=pk)
         
-class Informe_tienda(LoginRequiredMixin,View):#UserPassesTestMixin
-
-    # def test_func(self):
-    #     usuario=self.request.user
-    #     return usuario.is_staff or usuario.is_superuser
+class Informe_tienda(View):
 
     def get(self,request):
         #productos por marca
@@ -160,26 +133,29 @@ class Informe_tienda(LoginRequiredMixin,View):#UserPassesTestMixin
         top_productos=Producto.objects.annotate(total_vendida=Sum('ventas__unidades')).order_by('-total_vendida')[:10]
         
         #compras de un usuario
-        compras=Compra.objects.filter(usuario=self.request.user)
+        # compras=Compra.objects.filter(usuario=self.request.user)
 
         #diez mejores clientes
         top_clientes=Usuario.objects.annotate(total_gastado=Sum('compra__importe')).order_by('-total_gastado')[:10]
         
-        contexto={'marcas':marcas,'productos':productos,'marca_actual':marca_actual,'top_productos':top_productos,'compras':compras,'top_clientes':top_clientes}
+
+        #diez mayores compras
+        top_compras=Usuario.objects.annotate(total_compras=Count("compra")).order_by("-total_compras")[:10]
+
+        #numero total de compra
+        # num_total_compras=Compra.objects.aggregate(n_total=Count("id"))
+
+        #importe total de compras
+        # importe_total=Compra.objects.aggregate(import_total=Sum("importe"))
+
+        #numero total de compra e importe total de compras
+        estadisticas=Compra.objects.aggregate(n_total=Count("id"),import_total=Sum("importe"))
+
+        #MAX,MIN,MEDIA 
+        #num total de compras, importe total de compras,importe max, importe min, importe medio
+
+        contexto={"top_productos":top_productos,"top_clientes":top_clientes,"top_compras":top_compras,"estadisticas":estadisticas}
         return render(request,'informe/informe_tienda.html',contexto)
-
-# class LoginClientes(LoginView):
-#     template_name='registration/login.html'
-
-#     #he añadido superusuario
-#     def form_valid(self, form):
-#         usuario=form.get_user()
-#         es_cliente=Cliente.objects.filter(usuario=usuario).exists()
-#         es_superusuario=usuario.is_superuser
-#         if not es_cliente and not es_superusuario:
-#             messages.error(self.request,"Solo es para clientes")
-#             return self.form_invalid()
-#         return super().form_valid(form)
 
 class PerfilView(CreateView):
     model=Usuario

@@ -80,19 +80,9 @@ class Compra(models.Model):
         base=self.producto.precio*self.unidades
         porcentaje=Decimal(self.iva)/Decimal(100)
         resultado=base*(1+porcentaje)
-        self.importe=resultado
+        self.importe=round(resultado,2)
         return super().save(*args,**kwargs)
     
     def __str__(self):
-        return f"{self.producto.nombre} - Unidades: {self.unidades} - Importe: {self.importe}"
+        return f"{self.producto.nombre} - Unidades: {self.unidades} - Importe: {self.importe:.2f}"
     
-# class Cliente(models.Model):
-    
-#     class Meta:
-#         verbose_name="Cliente"
-#         verbose_name_plural="Clientes"
-
-#     usuario=models.OneToOneField(User,on_delete=models.CASCADE)
-
-#     def __str__(self):
-#         return f"{self.usuario.username}"

@@ -1,182 +1,19 @@
 {% extends 'base.html' %}
 
 {% block contenido %}
-<div class="container-fluid mt-4">
-    <div class="row">
-        
-        <div class="col-md-3">
-            <div class="card shadow-sm">
-                <div class="card-header bg-dark text-white">
-                    <h5 class="mb-0">Selecciona una Marca</h5>
-                </div>
-                <div class="list-group list-group-flush">
-                    {% for marca in marcas %}
-                        <a href="?marca_id={{ marca.id }}" 
-                           class="list-group-item list-group-item-action {% if marca_actual.id == marca.id %}active{% endif %}">
-                           {{ marca.nombre }}
-                        </a>
-                    {% empty %}
-                        <div class="p-3">No hay marcas registradas.</div>
-                    {% endfor %}
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-9">
-            {% if marca_actual %}
-                <h3 class="mb-3 text-primary">Productos de: {{ marca_actual.nombre }}</h3>
-                
-                {% if productos %}
-                    <div class="table-responsive">
-                        <table class="table table-striped table-hover border">
-                            <thead class="table-primary">
-                                <tr>
-                                    <th>Producto</th>
-                                    <th>Modelo</th>
-                                    <th>Precio</th>
-                                    <th>Stock</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for producto in productos %}
-                                    <tr>
-                                        <td>{{ producto.nombre }}</td>
-                                        <td>{{ producto.modelo }}</td>
-                                        <td>{{ producto.precio }} €</td>
-                                        <td>{{ producto.unidades }}</td>
-                                    </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                {% else %}
-                    <div class="alert alert-warning">
-                        Esta marca no tiene productos registrados actualmente.
-                    </div>
-                {% endif %}
-
-            {% else %}
-                <div class="jumbotron p-5 bg-light border rounded">
-                    <h1>Informes de Stock</h1>
-                    <p class="lead">Por favor, selecciona una marca del menú de la izquierda para ver el desglose de productos.</p>
-                </div>
-            {% endif %}
-        </div>
-    </div>
-</div>
-<div class="container mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2><i class="bi bi-bag-check-fill"></i> Mi Historial de Compras</h2>
-        <a href="{% url 'listado_productos' %}" class="btn btn-outline-primary">Seguir comprando</a>
-    </div>
-
-    <div class="card shadow">
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
-                    <thead class="table-dark">
-                        <tr>
-                            <th># Pedido</th>
-                            <th>Producto (Detalle)</th>
-                            <th class="text-center">Unidades</th>
-                            <th class="text-end">Precio Unit.</th>
-                            <th class="text-end">Importe Total</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for compra in compras %}
-                            <tr>
-                                <td class="text-muted small">#{{ compra.id }}</td>
-                                
-                                <td>
-                                    <div class="d-flex align-items-center">
-                                        {% if compra.producto.foto %}
-                                            <img src="{{ compra.producto.foto.url }}" alt="" class="rounded-circle me-2" style="width: 40px; height: 40px; object-fit: cover;">
-                                        {% endif %}
-                                        
-                                        <a href="{% url 'detalle_producto' compra.producto.pk %}" class="text-decoration-none fw-bold text-dark">
-                                            {{ compra.producto.nombre }}
-                                        </a>
-                                    </div>
-                                    <small class="text-muted">{{ compra.producto.marca }} - {{ compra.producto.modelo }}</small>
-                                </td>
-
-                                <td class="text-center">
-                                    <span class="badge bg-secondary rounded-pill">{{ compra.unidades }}</span>
-                                </td>
-
-                                <td class="text-end text-muted">
-                                    {{ compra.producto.precio }}€
-                                </td>
-
-                                <td class="text-end fw-bold text-success fs-5">
-                                    {{ compra.importe|floatformat:2 }}€
-                                </td>
-                            </tr>
-                        {% empty %}
-                            <tr>
-                                <td colspan="5" class="text-center py-5">
-                                    <i class="bi bi-cart-x display-1 text-muted"></i>
-                                    <p class="mt-3 lead">Aún no has realizado ninguna compra.</p>
-                                    <a href="{% url 'listado_productos' %}" class="btn btn-primary mt-2">Ir al catálogo</a>
-                                </td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-</div>
-<div class="container mt-4">
-    <h2 class="text-center mb-4"><i class="bi bi-star-fill text-warning"></i> Top 10 Mejores Clientes</h2>
-
-    <div class="card shadow">
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
-                    <thead class="table-dark">
-                        <tr>
-                            <th class="text-center">Ranking</th>
-                            <th>Cliente</th>
-                            <th>Email</th>
-                            <th class="text-end">Total Gastado</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for cliente in top_clientes %}
-                            {% if cliente.total_gastado > 0 %}
-                                <tr>
-                                    <td class="text-center fw-bold fs-5">
-                                        {% if forloop.counter == 1 %}🥇{% endif %}
-                                        {% if forloop.counter == 2 %}🥈{% endif %}
-                                        {% if forloop.counter == 3 %}🥉{% endif %}
-                                        {% if forloop.counter > 3 %}#{{ forloop.counter }}{% endif %}
-                                    </td>
-                                    
-                                    <td class="fw-bold">
-                                        {{ cliente.username }}
-                                        {% if cliente == user %}
-                                            <span class="badge bg-primary ms-2">¡Eres tú!</span>
-                                        {% endif %}
-                                    </td>
-                                    
-                                    <td class="text-muted">{{ cliente.email }}</td>
-                                    
-                                    <td class="text-end fw-bold text-success fs-5">
-                                        {{ cliente.total_gastado|floatformat:2 }} €
-                                    </td>
-                                </tr>
-                            {% endif %}
-                        {% empty %}
-                            <tr>
-                                <td colspan="4" class="text-center py-4">No hay datos de ventas suficientes.</td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-</div>
+<h1>Informes</h1>
+<h2>Top 10 productos más vendidos:</h2>
+{% for top_producto in top_productos %}
+    <p>{{top_producto}}</p>
+{% endfor %}
+<h2>Top 10 clientes con mayor gasto</h2>
+{% for top_cliente in top_clientes %}
+    <p>Cliente: {{top_cliente}} - Importe: {{top_cliente.total_gastado}}</p>
+{% endfor %}
+<h2>Top 10 mayores compras</h2>
+{% for top_compra in top_compras %}
+    <p>Cliente: {{top_compra.username}} - Total compras: {{top_compra.total_compras}}</p>
+{% endfor %}
+<h2>Estadisticas generales</h2>
+<p>Número total de compras: {{}}</p>
 {% endblock %}
